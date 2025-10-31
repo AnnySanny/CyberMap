@@ -79,7 +79,7 @@ export default function AdminStat() {
   const totalSum = orders.reduce((acc, o) => acc + (o.totalPrice || 0), 0);
   const completed = orders.filter((o) => o.status === "Виконано").length;
   const pending = orders.filter((o) => o.status === "Очікує").length;
-  const cancelled = orders.filter((o) => o.status === "Скасовано").length;
+  
 
   return (
     <>
@@ -96,6 +96,7 @@ export default function AdminStat() {
             { label: "Загальна сума", value: `${totalSum} ₴` },
             { label: "Виконано", value: completed },
             { label: "Очікує", value: pending },
+            { label: "Скасовано", value: cancelled },
           ].map((card, i) => (
             <div
               key={i}
