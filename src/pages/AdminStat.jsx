@@ -96,7 +96,6 @@ export default function AdminStat() {
             { label: "Загальна сума", value: `${totalSum} ₴` },
             { label: "Виконано", value: completed },
             { label: "Очікує", value: pending },
-            { label: "Скасовано", value: cancelled },
           ].map((card, i) => (
             <div
               key={i}
