@@ -12,31 +12,43 @@ function runClustering(incidents) {
     let output = "";
     let stderr = "";
 
+    py.stdout.setEncoding("utf8");
+    py.stderr.setEncoding("utf8");
+
+    py.on("error", err => {
+      console.error("PYTHON PROCESS ERROR:", err);
+      reject(err);
+    });
+    py.stdin.on("error", err => {
+      if (err.code !== "EOF") {
+        console.error("PYTHON STDIN ERROR:", err);
+      }
+    });
+
     py.stdout.on("data", data => {
-      output += data.toString();
+      output += data;
     });
 
     py.stderr.on("data", data => {
-     
-      stderr += data.toString();
+      stderr += data;
     });
 
-    py.on("close", (code) => {
+    py.on("close", code => {
       if (code !== 0) {
-        console.error("PYTHON STDERR:", stderr);
-        reject("Python process failed");
+        console.error("PYTHON STDERR:\n", stderr);
+        reject(new Error("Python exited with code " + code));
         return;
       }
 
       try {
-        const parsed = JSON.parse(output);
-        resolve(parsed);
+        resolve(JSON.parse(output));
       } catch (e) {
-        console.error("INVALID JSON:", output);
-        reject("Invalid JSON from Python");
+        console.error("INVALID JSON FROM PYTHON:\n", output);
+        reject(e);
       }
     });
 
+  
     py.stdin.write(JSON.stringify(incidents));
     py.stdin.end();
   });

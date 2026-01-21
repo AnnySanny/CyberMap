@@ -2,13 +2,24 @@ import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 
-export default function NodeSphere({ position, cluster, severity, raw, onSelect, selectedId }) {
+export default function NodeSphere({ position, cluster, severity, raw, onSelect, selectedId, showLabel = true }) {
   const meshRef = useRef();
   const [hovered, setHovered] = useState(false);
 
   const isSelected = raw.id === selectedId;
 
-  const colors = ["#ff4444", "#44ff44", "#4444ff", "#ffaa00"];
+const colors = [
+  "#ff4444",
+  "#44ff44",
+  "#4444ff",
+  "#ffaa00",
+  "#9b5cff",
+  "#00ffd5",
+  "#ff6ec7",
+  "#00c2ff",
+  "#ffd700",
+  "#7cff00"
+];
   const baseColor = colors[cluster % colors.length];
   const hoverColor = "#ffffff";
 
@@ -50,17 +61,19 @@ export default function NodeSphere({ position, cluster, severity, raw, onSelect,
         />
       </mesh>
 
-      <Text
-        position={[0, 0.6, 0]}
-        fontSize={0.25}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.02}
-        outlineColor="#000000"
-      >
-        {raw.type}
-      </Text>
+{showLabel && (
+  <Text
+    position={[0, 0.6, 0]}
+    fontSize={0.25}
+    color="white"
+    anchorX="center"
+    anchorY="middle"
+    outlineWidth={0.02}
+    outlineColor="#000000"
+  >
+    {raw.type}
+  </Text>
+)}
     </group>
   );
 }

@@ -2,43 +2,41 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import NodeSphere from "./NodeSphere";
 import transformData from "../utils/transformData";
-
-export default function CyberScene({ incidents, onSelect }) {
+import { Line } from "@react-three/drei";
+export default function CyberScene({
+  incidents,
+  edges = [],
+  showEdges = true,
+  showLabels = true,
+  onSelect,
+}) {
   const points = transformData(incidents);
+
+  const pointMap = Object.fromEntries(points.map((p) => [p.raw.id, p]));
 
   return (
     <Canvas
       camera={{ position: [0, 5, 12], fov: 55 }}
-      style={{ background: "#0A0F1F" }}   // 🔥 кібер-темний фон
+      style={{ background: "#0A0F1F" }}
     >
-
-      {/* Light */}
       <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1} color={"#4ab8ff"} />
-      <pointLight position={[-10, -5, -10]} intensity={0.5} color={"#1e3a8a"} />
+      <pointLight position={[10, 10, 10]} intensity={1} color="#4ab8ff" />
+      <pointLight position={[-10, -5, -10]} intensity={0.5} color="#1e3a8a" />
 
-      {/* Fog — кібер-ефект глибини */}
       <fog attach="fog" args={["#0A0F1F", 10, 40]} />
-
       <OrbitControls enableDamping dampingFactor={0.1} />
 
-      {/* НЕОН-ПЛОЩИНА */}
+      {/* сцена */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
         <planeGeometry args={[80, 80]} />
-        <meshBasicMaterial
-          color="#112233"
-          opacity={0.25}
-          transparent
-        />
+        <meshBasicMaterial color="#112233" opacity={0.25} transparent />
       </mesh>
 
-      {/* НЕОН-СІТКА GRID */}
       <gridHelper
         args={[80, 60, "#173b6c", "#1d4ed8"]}
         position={[0, -1.49, 0]}
       />
 
-      {/* НЕОН-ГЕКСАГОНАЛЬНЕ КІЛЬЦЕ (як у кіберсистемах) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.45, 0]}>
         <circleGeometry args={[25, 6]} />
         <meshBasicMaterial
@@ -49,30 +47,38 @@ export default function CyberScene({ incidents, onSelect }) {
         />
       </mesh>
 
-      {/* НЕВЕЛИКІ ПАРТІКЛИ-ДАНІ */}
-      {Array.from({ length: 40 }).map((_, i) => (
-        <mesh key={i} position={[
-          (Math.random() - 0.5) * 30,
-          Math.random() * 5 + 1,
-          (Math.random() - 0.5) * 30
-        ]}>
-          <sphereGeometry args={[0.05, 8, 8]} />
-          <meshBasicMaterial color="#4ab8ff" opacity={0.5} transparent />
-        </mesh>
-      ))}
+      {/* === EDGES === */}
+      {showEdges &&
+        edges.map((edge, i) => {
+          const a = pointMap[edge.source];
+          const b = pointMap[edge.target];
+          if (!a || !b) return null;
 
-      {/* Рендер сфер інцидентів */}
-      {points.map(point => (
-        <NodeSphere
-          key={point.id}
-          position={point.position}
-          cluster={point.cluster}
-          severity={point.severity}
-          raw={point.raw}
-          onSelect={onSelect}
-        />
-      ))}
+          return (
+            <Line
+              key={i}
+              points={[a.position, b.position]}
+              color={edge.clusterA === edge.clusterB ? "#4ab8ff" : "#ffaa00"}
+              transparent
+              opacity={Math.min(edge.weight, 0.8)}
+              lineWidth={1}
+            />
+          );
+        })}
 
+      {/* === NODES === */}
+      {points.map((point) => (
+<NodeSphere
+  key={point.id}
+  position={point.position}
+  cluster={point.cluster}
+  severity={point.severity}
+  raw={point.raw}
+  showLabel={showLabels}
+  onSelect={onSelect}
+/>
+
+      ))}
     </Canvas>
   );
 }

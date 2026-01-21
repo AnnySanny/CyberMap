@@ -7,7 +7,7 @@ function calcSeverity(item) {
     (item.shortDescription || "")
   ).toLowerCase();
 
-  // критичні слова
+
   if (
     text.includes("remote code execution") ||
     text.includes("rce") ||
@@ -20,7 +20,7 @@ function calcSeverity(item) {
     text.includes("admin")
   ) score += 1;
 
-  // популярні критичні продукти
+
   const criticalVendors = [
     "microsoft",
     "google",
@@ -35,7 +35,7 @@ function calcSeverity(item) {
     )
   ) score += 1;
 
-  // новизна (2024–2025)
+
   if (item.dateAdded) {
     const year = new Date(item.dateAdded).getFullYear();
     if (year >= 2024) score += 1;
